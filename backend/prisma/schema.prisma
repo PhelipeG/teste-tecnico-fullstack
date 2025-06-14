@@ -1,0 +1,17 @@
+
+//usando sqlite como banco de dados para desenvolvimento local
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+generator client {
+  provider = "prisma-client-js"
+}
+model Order {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  items      String   // JSON string com os produtos
+  totalPrice Float
+  createdAt  DateTime @default(now())
+}
