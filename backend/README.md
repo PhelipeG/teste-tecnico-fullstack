@@ -34,6 +34,7 @@
 - ✅ Unificação de produtos de dois fornecedores (Brasileiro e Europeu)
 - ✅ Listagem de todos os produtos
 - ✅ Busca de produto por ID
+- ✅ Busca e filtros avançados (nome, categoria, fornecedor, departamento, material)
 - ✅ Padronização de dados entre fornecedores
 
 ### **Pedidos**
@@ -57,8 +58,8 @@ npm ou yarn
 
 ### **1. Clone o repositório**
 ```bash
-git clone [URL_DO_REPOSITORIO]
-cd devnology-ecommerce/backend
+git clone https://github.com/PhelipeG/teste-tecnico-fullstack.git
+cd teste-técnico-fullstack/backend
 ```
 
 ### **2. Instale as dependências**
@@ -101,7 +102,12 @@ A documentação interativa da API está disponível via Swagger:
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| `GET` | `/products` | Lista todos os produtos unificados |
+| `GET` | `/products` | Lista todos os produtos unificados com filtros opcionais |
+| `GET` | `/products?search=termo` | Busca produtos por nome ou descrição |
+| `GET` | `/products?category=categoria` | Filtra produtos por categoria |
+| `GET` | `/products?provider=brazilian` | Filtra produtos por fornecedor |
+| `GET` | `/products?department=departamento` | Filtra produtos por departamento |
+| `GET` | `/products?material=material` | Filtra produtos por material |
 | `GET` | `/products/:id` | Busca produto por ID |
 
 ### **Pedidos**
@@ -122,24 +128,25 @@ A documentação interativa da API está disponível via Swagger:
 
 ### **Listar Produtos**
 ```bash
+# Todos os produtos
 curl -X GET http://localhost:3000/products
+
+# Buscar por nome/descrição
+curl -X GET "http://localhost:3000/products?search=teclado"
+
+# Filtrar por categoria
+curl -X GET "http://localhost:3000/products?category=Refinado"
+
+# Filtrar por fornecedor
+curl -X GET "http://localhost:3000/products?provider=brazilian"
+
+# Combinar múltiplos filtros
+curl -X GET "http://localhost:3000/products?search=steel&provider=european&category=refinado"
 ```
 
-**Resposta:**
-```json
-[
-  {
-    "id": "1",
-    "name": "Produto Exemplo",
-    "description": "Descrição do produto",
-    "price": "99.99",
-    "category": "Categoria",
-    "image": "http://exemplo.com/imagem.jpg",
-    "material": "Material",
-    "department": "Departamento",
-    "provider": "brazilian"
-  }
-]
+### **Buscar Produto por ID**
+```bash
+curl -X GET http://localhost:3000/products/1
 ```
 
 ### **Criar Pedido**
@@ -181,6 +188,8 @@ backend/
 │   │   ├── orders.service.ts
 │   │   └── orders.module.ts
 │   ├── products/            # Módulo de produtos
+│   │   ├
+│   │   │   
 │   │   ├── products.controller.ts
 │   │   ├── products.service.ts
 │   │   └── products.module.ts
@@ -209,34 +218,6 @@ backend/
 - **Migrations**: Controle de versão do schema
 - **Query builder**: Sintaxe intuitiva e segura
 
-### **Unificação de APIs**
-```typescript
-// Mapeamento padronizado entre fornecedores
-private mapBrazilianProduct(item: ApiProductBR): Product {
-  return {
-    id: item.id,
-    name: item.nome,        // PT -> EN
-    description: item.descricao,
-    price: item.preco,
-    // ...outros campos
-    provider: 'brazilian'
-  };
-}
-
-private mapEuropeanProduct(item: ApiProductEU): Product {
-  return {
-    id: item.id,
-    name: item.name,        // Já em inglês
-    description: item.description,
-    price: item.price,
-    image: item.gallery?.[0] ?? '', // Primeira imagem da galeria
-    material: item.details?.material ?? '',
-    // ...outros campos
-    provider: 'european'
-  };
-}
-```
-
 ### **Validação e Segurança**
 - **class-validator**: Validação automática de DTOs
 - **helmet**: Headers de segurança
@@ -254,20 +235,6 @@ export default function safeParse<T>(jsonString: string): T | null {
   }
 }
 ```
-
-## 🧪 **Testes**
-
-```bash
-# Testes unitários
-npm run test
-
-# Testes e2e
-npm run test:e2e
-
-# Coverage
-npm run test:cov
-```
-
 ## 🌍 **APIs Externas Utilizadas**
 
 ### **Fornecedor Brasileiro**
@@ -295,4 +262,30 @@ npm run test:cov
 - ✅ Estrutura modular e escalável
 - ✅ Type safety com TypeScript
 - ✅ Headers de segurança com Helmet
----
+- ✅ **Sistema avançado de busca e filtros**
+- ✅ **Validação de query parameters**
+- ✅ **Logging estruturado**
+- ✅ **Separação de responsabilidades**
+
+## 🧪 **Como Testar a API**
+
+### **Swagger UI (Recomendado)**
+Acesse: `http://localhost:3000/api`
+- Interface visual para testar todos os endpoints
+- Documentação interativa completa
+- Validação automática de parâmetros
+
+### **Exemplos de Testes com curl**
+```bash
+# Teste básico
+curl "http://localhost:3000/products"
+
+# Teste de busca
+curl "http://localhost:3000/products?search=steel"
+
+# Teste de filtros combinados
+curl "http://localhost:3000/products?provider=brazilian&category=Refinado"
+
+# Health check
+curl "http://localhost:3000/health"
+```
