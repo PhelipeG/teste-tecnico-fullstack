@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import axios from 'axios';
 
+// Interfaces para os produtos
 export interface Product {
   id: string;
   name: string;
@@ -18,13 +19,25 @@ export interface Product {
 }
 
 export interface ProductFilters {
+  page?: number;
+  limit?: number;
   search?: string;
   category?: string;
-  provider?: string;
+  provider?: 'brazilian' | 'european';
   department?: string;
   material?: string;
 }
 
+export interface PaginatedResponse {
+  products: Product[];
+  totalPages: number;
+  currentPage: number;
+  totalItems: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// Interfaces das APIs externas
 interface ApiProductBR {
   id: string;
   nome: string;
@@ -41,137 +54,64 @@ interface ApiProductEU {
   name: string;
   description: string;
   price: string;
-  discountValue?: string;
   gallery: string[];
-  details: {
-    adjective?: string;
-    material: string;
-  };
+  details: { material: string };
   category?: string;
   department?: string;
 }
 
 @Injectable()
 export class ProductsService {
-  private brazilianURL =
+  private readonly BRAZILIAN_API =
     'http://616d6bdb6dacbb001794ca17.mockapi.io/devnology/brazilian_provider';
-  private europeanURL =
+  private readonly EUROPEAN_API =
     'http://616d6bdb6dacbb001794ca17.mockapi.io/devnology/european_provider';
+  private readonly DEFAULT_LIMIT = 12;
 
-  //mapeando api brasileira
-  private mapBrazilianProduct(item: ApiProductBR): Product {
-    return {
-      id: item.id,
-      name: item.nome,
-      description: item.descricao,
-      price: item.preco,
-      category: item.categoria,
-      image: item.imagem,
-      material: item.material,
-      department: item.departamento,
-      provider: 'brazilian',
-    };
-  }
-  //mapeando api europeia
-  private mapEuropeanProduct(item: ApiProductEU): Product {
-    return {
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      category: item.category ?? '',
-      image: item.gallery?.[0] ?? '', // pega a primeira imagem da galeria
-      material: item.details?.material ?? '',
-      department: item.department ?? '',
-      provider: 'european',
-    };
-  }
-  // funcao que retorna os dados das duas api(tipads corretamente)
-  async getAllProducts(filters?: ProductFilters): Promise<Product[]> {
+  async getAllProducts(filters?: ProductFilters): Promise<PaginatedResponse> {
     try {
-      const [productsBr, productsEu] = await Promise.all([
-        axios.get<ApiProductBR[]>(this.brazilianURL),
-        axios.get<ApiProductEU[]>(this.europeanURL),
+      const [brazilianData, europeanData] = await Promise.all([
+        axios.get<ApiProductBR[]>(this.BRAZILIAN_API),
+        axios.get<ApiProductEU[]>(this.EUROPEAN_API),
       ]);
-      const brProducts: Product[] = productsBr.data.map((item) =>
-        this.mapBrazilianProduct(item),
-      );
-      const euProducts: Product[] = productsEu.data.map((item) =>
-        this.mapEuropeanProduct(item),
-      );
-      let allProducts = [...brProducts, ...euProducts];
+      const allProducts = [
+        ...brazilianData.data.map(this.mapBrazilianProduct),
+        ...europeanData.data.map(this.mapEuropeanProduct),
+      ];
 
-      // Aplicar filtros se fornecidos
-      if (filters) {
-        allProducts = this.applyFilters(allProducts, filters);
+      // Aplicar filtros
+      const filteredProducts = this.applyFilters(allProducts, filters);
+
+      const shouldPaginate = filters?.page || filters?.limit;
+
+      if (!shouldPaginate) {
+        return {
+          products: filteredProducts,
+          totalPages: 1,
+          currentPage: 1,
+          totalItems: filteredProducts.length,
+          hasNext: false,
+          hasPrev: false,
+        };
       }
 
-      return allProducts;
-    } catch (error) {
+      // Aplicar paginação apenas quando especificado
+      return this.paginate(filteredProducts, filters);
+    } catch {
       throw new BadGatewayException(
         'Erro ao buscar produtos das APIs externas',
-        error,
       );
     }
   }
 
-  private applyFilters(
-    products: Product[],
-    filters: ProductFilters,
-  ): Product[] {
-    let filteredProducts = products; // inicializa com todos os produtos
-    const { search, category, provider, department, material } = filters;
-
-    // Filtro de busca (nome ou descrição)
-    if (search) {
-      const searchTerm = search.toLowerCase();
-      filteredProducts = filteredProducts.filter(
-        (product) =>
-          product.name.trim().toLowerCase().includes(searchTerm) ||
-          product.description.trim().toLowerCase().includes(searchTerm),
-      );
-    }
-
-    // Filtro por categoria
-    if (category) {
-      filteredProducts = filteredProducts.filter((product) =>
-        product.category.toLowerCase().includes(category.toLowerCase()),
-      );
-    }
-
-    // Filtro por fornecedor
-    if (provider) {
-      filteredProducts = filteredProducts.filter(
-        (product) => product.provider === provider,
-      );
-    }
-
-    // Filtro por departamento
-    if (department) {
-      filteredProducts = filteredProducts.filter((product) =>
-        product.department.toLowerCase().includes(department.toLowerCase()),
-      );
-    }
-
-    // Filtro por material
-    if (material) {
-      filteredProducts = filteredProducts.filter((product) =>
-        product.material.toLowerCase().includes(material.toLowerCase()),
-      );
-    }
-
-    return filteredProducts;
-  }
-  //pega todos os produtos unificados e busca o id nessa lista
   async getProductById(id: string): Promise<Product> {
     try {
-      const products = await this.getAllProducts();
-      const product = products.find((product) => product.id === id);
+      const response = await this.getAllProducts({ limit: 1000 });
+      const product = response.products.find((p) => p.id === id);
 
       if (!product) {
         throw new NotFoundException(`Produto com ID ${id} não encontrado`);
       }
-
       return product;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -179,5 +119,96 @@ export class ProductsService {
       }
       throw new BadGatewayException('Erro ao buscar produto');
     }
+  }
+
+  // Mapear produto brasileiro para formato padrão
+  private mapBrazilianProduct = (item: ApiProductBR): Product => ({
+    id: item.id,
+    name: item.nome,
+    description: item.descricao,
+    price: item.preco,
+    category: item.categoria,
+    image: item.imagem,
+    material: item.material,
+    department: item.departamento,
+    provider: 'brazilian',
+  });
+
+  // Mapear produto europeu para formato padrão
+  private mapEuropeanProduct = (item: ApiProductEU): Product => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: item.price,
+    category: item.category || '',
+    image: item.gallery?.[0] || '',
+    material: item.details?.material || '',
+    department: item.department || '',
+    provider: 'european',
+  });
+  private applyFilters(
+    products: Product[],
+    filters?: ProductFilters,
+  ): Product[] {
+    if (!filters) return products;
+
+    return products.filter((product) => {
+      // Filtro de busca por nome ou descrição
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        const matchesSearch =
+          product.name.toLowerCase().includes(searchTerm) ||
+          product.description.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return false;
+      }
+
+      // Filtros
+      if (
+        filters.category &&
+        !product.category.toLowerCase().includes(filters.category.toLowerCase())
+      ) {
+        return false;
+      }
+      if (filters.provider && product.provider !== filters.provider) {
+        return false;
+      }
+      if (
+        filters.department &&
+        !product.department
+          .toLowerCase()
+          .includes(filters.department.toLowerCase())
+      ) {
+        return false;
+      }
+      if (
+        filters.material &&
+        !product.material.toLowerCase().includes(filters.material.toLowerCase())
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+  private paginate(
+    products: Product[],
+    filters?: ProductFilters,
+  ): PaginatedResponse {
+    const page = filters?.page || 1;
+    const limit = filters?.limit || this.DEFAULT_LIMIT;
+    const totalItems = products.length;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const startIndex = (page - 1) * limit;
+    const paginatedProducts = products.slice(startIndex, startIndex + limit);
+
+    return {
+      products: paginatedProducts,
+      totalPages,
+      currentPage: page,
+      totalItems,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    };
   }
 }
