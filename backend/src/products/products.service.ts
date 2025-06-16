@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadGatewayException,
+} from '@nestjs/common';
 import axios from 'axios';
 
 export interface Product {
@@ -11,6 +15,14 @@ export interface Product {
   material: string;
   department: string;
   provider: 'brazilian' | 'european';
+}
+
+export interface ProductFilters {
+  search?: string;
+  category?: string;
+  provider?: string;
+  department?: string;
+  material?: string;
 }
 
 interface ApiProductBR {
@@ -41,7 +53,6 @@ interface ApiProductEU {
 
 @Injectable()
 export class ProductsService {
-  // recebe os dois endpoints de produtos
   private brazilianURL =
     'http://616d6bdb6dacbb001794ca17.mockapi.io/devnology/brazilian_provider';
   private europeanURL =
@@ -76,34 +87,97 @@ export class ProductsService {
     };
   }
   // funcao que retorna os dados das duas api(tipads corretamente)
-  async getAllProducts(): Promise<Product[]> {
-    const [productsBr, productsEu] = await Promise.all([
-      axios.get<ApiProductBR[]>(this.brazilianURL),
-      axios.get<ApiProductEU[]>(this.europeanURL),
-    ]);
-    const brProducts: Product[] = productsBr.data.map((item) =>
-      this.mapBrazilianProduct(item),
-    );
-    const euProducts: Product[] = productsEu.data.map((item) =>
-      this.mapEuropeanProduct(item),
-    );
-    return [...brProducts, ...euProducts];
+  async getAllProducts(filters?: ProductFilters): Promise<Product[]> {
+    try {
+      const [productsBr, productsEu] = await Promise.all([
+        axios.get<ApiProductBR[]>(this.brazilianURL),
+        axios.get<ApiProductEU[]>(this.europeanURL),
+      ]);
+      const brProducts: Product[] = productsBr.data.map((item) =>
+        this.mapBrazilianProduct(item),
+      );
+      const euProducts: Product[] = productsEu.data.map((item) =>
+        this.mapEuropeanProduct(item),
+      );
+      let allProducts = [...brProducts, ...euProducts];
+
+      // Aplicar filtros se fornecidos
+      if (filters) {
+        allProducts = this.applyFilters(allProducts, filters);
+      }
+
+      return allProducts;
+    } catch (error) {
+      throw new BadGatewayException(
+        'Erro ao buscar produtos das APIs externas',
+        error,
+      );
+    }
+  }
+
+  private applyFilters(
+    products: Product[],
+    filters: ProductFilters,
+  ): Product[] {
+    let filteredProducts = products; // inicializa com todos os produtos
+    const { search, category, provider, department, material } = filters;
+
+    // Filtro de busca (nome ou descrição)
+    if (search) {
+      const searchTerm = search.toLowerCase();
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          product.name.trim().toLowerCase().includes(searchTerm) ||
+          product.description.trim().toLowerCase().includes(searchTerm),
+      );
+    }
+
+    // Filtro por categoria
+    if (category) {
+      filteredProducts = filteredProducts.filter((product) =>
+        product.category.toLowerCase().includes(category.toLowerCase()),
+      );
+    }
+
+    // Filtro por fornecedor
+    if (provider) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.provider === provider,
+      );
+    }
+
+    // Filtro por departamento
+    if (department) {
+      filteredProducts = filteredProducts.filter((product) =>
+        product.department.toLowerCase().includes(department.toLowerCase()),
+      );
+    }
+
+    // Filtro por material
+    if (material) {
+      filteredProducts = filteredProducts.filter((product) =>
+        product.material.toLowerCase().includes(material.toLowerCase()),
+      );
+    }
+
+    return filteredProducts;
   }
   //pega todos os produtos unificados e busca o id nessa lista
-  async getProductById(id: string): Promise<Product | undefined> {
+  async getProductById(id: string): Promise<Product> {
     try {
       const products = await this.getAllProducts();
-      const productId = products.find((product) => product.id === id);
-      if (!productId) {
-        throw new Error('Produto não encontrado');
+      const product = products.find((product) => product.id === id);
+
+      if (!product) {
+        throw new NotFoundException(`Produto com ID ${id} não encontrado`);
       }
-      return productId;
+
+      return product;
     } catch (error) {
-      // Se já for uma exceção HTTP, apenas relança
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new NotFoundException('Produto não encontrado');
+      throw new BadGatewayException('Erro ao buscar produto');
     }
   }
 }
