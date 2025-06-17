@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +12,7 @@ import {
 import { formatPrice } from "../../../utils/util";
 import OrderSuccess from "./OrderSuccess";
 import ResumeCheckout from "./ResumeCheckout";
+import toast from "react-hot-toast";
 
 export default function CheckoutForm() {
   const { items, totalPrice, clearCart } = useCart();
@@ -29,31 +31,33 @@ export default function CheckoutForm() {
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
     onSuccess: (response) => {
-      console.log("Pedido criado:", response);
+      toast.success("Pedido criado com sucesso! 🎉", {
+        duration: 3000,
+      });
       setOrderSuccess(true);
       clearCart();
       reset();
     },
     onError: (error) => {
-      console.error("Erro:", error);
-      alert("Erro ao processar pedido. Tente novamente.");
+      toast.dismiss("create-order");
+      toast.error(`❌ Erro ao processar pedido: ${error.message}`, {
+        duration: 5000,
+      });
     },
   });
 
   // Função para enviar o formulário
   const onSubmit = (data: CheckoutData) => {
     if (items.length === 0) {
-      alert("Carrinho está vazio!");
+      toast.error("Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido.🛒");
       return;
     }
-
     const orderData: CreateOrderRequest = {
       name: data.name,
       email: data.email,
       items: items.map((item) => item.product),
       totalPrice: totalPrice,
     };
-
     createOrderMutation.mutate(orderData);
   };
   // Se o pedido foi criado com sucesso

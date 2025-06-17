@@ -13,7 +13,7 @@ Um e-commerce moderno desenvolvido com React, TypeScript e Tailwind CSS.
 
 1. **Clone o repositório**
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/PhelipeG/teste-tecnico-fullstack.git
 cd devnology-ecommerce/frontend
 ```
 
@@ -199,8 +199,6 @@ O projeto é totalmente responsivo, funcionando bem em:
 - 📱 Mobile (320px+)
 - 📟 Tablet (768px+)
 - 🖥️ Desktop (1024px+)
-
-
 ---
 
 Desenvolvido com ❤️ usando React + TypeScript
