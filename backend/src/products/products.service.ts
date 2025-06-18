@@ -156,9 +156,7 @@ export class ProductsService {
       // Filtro de busca por nome ou descrição
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase();
-        const matchesSearch =
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.description.toLowerCase().includes(searchTerm);
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm);
         if (!matchesSearch) return false;
       }
 
