@@ -43,7 +43,7 @@ Aplicação web em React + TypeScript para e-commerce, integrando produtos de do
 2. **Clone o repositório:**
    ```bash
    git clone https://github.com/PhelipeG/teste-tecnico-fullstack.git
-   cd devnology-ecommerce/frontend
+   cd teste-tecnico-fullstack/frontend
    ```
 
 3. **Instale as dependências:**
