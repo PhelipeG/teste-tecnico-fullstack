@@ -5,14 +5,19 @@ interface ActiveFiltersProps {
   department: string;
 }
 
-export default function ActiveFilters({ search, category, provider, department }: ActiveFiltersProps) {
+export default function ActiveFilters({
+  search,
+  category,
+  provider,
+  department,
+}: ActiveFiltersProps) {
   const hasFilters = search || category || provider || department;
 
   if (!hasFilters) return null;
 
   const getProviderName = (providerValue: string) => {
-    if (providerValue === 'brazilian') return 'Brasileiro';
-    if (providerValue === 'european') return 'Europeu';
+    if (providerValue === "brazilian") return "Brasileiro";
+    if (providerValue === "european") return "Europeu";
     return providerValue;
   };
 

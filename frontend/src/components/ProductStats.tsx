@@ -5,11 +5,11 @@ interface ProductStatsProps {
   displayedItems: number;
 }
 
-export default function ProductStats({ 
-  totalItems, 
-  currentPage, 
+export default function ProductStats({
+  totalItems,
+  currentPage,
   itemsPerPage,
-  displayedItems 
+  displayedItems,
 }: ProductStatsProps) {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(startItem + displayedItems - 1, totalItems);

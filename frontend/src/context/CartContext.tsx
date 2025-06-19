@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { Product } from "../@types/Product";
 import toast from "react-hot-toast";
 
@@ -19,11 +19,38 @@ interface CartContextType {
   toggleCart: () => void;
   clearCart: () => void;
 }
+const CART_STORAGE_KEY = "devcommerce-cart";
+
+// Função para salvar no localStorage
+const saveCartToStorage = (items: CartItem[]) => {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error("Erro ao salvar carrinho no localStorage:", error);
+  }
+};
+
+// Função para carregar do localStorage
+const loadCartFromStorage = (): CartItem[] => {
+  try {
+    const saved = localStorage.getItem(CART_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (error) {
+    console.error("Erro ao carregar carrinho do localStorage:", error);
+    return [];
+  }
+};
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage());
   const [isOpen, setIsOpen] = useState(false);
+
+  // Salvar no localStorage sempre que items mudar
+  useEffect(() => {
+    saveCartToStorage(items);
+  }, [items]);
 
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = items.reduce(

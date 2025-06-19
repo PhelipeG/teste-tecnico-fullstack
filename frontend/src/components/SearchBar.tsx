@@ -6,7 +6,10 @@ interface SearchBarProps {
 export default function SearchBar({ search, onSearchChange }: SearchBarProps) {
   return (
     <div>
-      <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+      <label
+        htmlFor="search"
+        className="block text-sm font-medium text-gray-700 mb-2"
+      >
         Buscar produtos
       </label>
       <input

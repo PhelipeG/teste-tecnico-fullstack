@@ -1,66 +1,118 @@
-# DevCommerce - Frontend
+# Devnology Ecommerce. 
 
-E-commerce simples feito com React, TypeScript e Tailwind CSS.
-
-## 📥 Como baixar o projeto
-
-```bash
-git clone https://github.com/seu-usuario/seu-repo.git
-cd devnology-ecommerce/frontend
-```
-
-## 🚀 Como Rodar
-
-1. **Instale as dependências**
+**Instale as dependências:**
    ```bash
    npm install
    ```
-2. **Configure o backend**
+4. **Configure o backend:**
    - O backend deve estar rodando em http://localhost:3000
    - Configure o arquivo `.env`:
      ```bash
-     VITE_BASE_URL_API=http://localhost:3000/api
+     VITE_BASE_URL_API=http://localhost:3000
      ```
-3. **Inicie o projeto**
+5. **Inicie o projeto:**
    ```bash
    npm run dev
    ```
-4. **Acesse**
+6. **Acesse:**
    - http://localhost:5173
 
-## 🛠️ Tecnologias utilizadas e motivos
-
-- **React**: biblioteca moderna, componentização e reatividade.
-- **TypeScript**: segurança de tipos, menos bugs e melhor manutenção.
-- **Vite**: build rápido, hot reload eficiente e configuração simples.
-- **Tailwind CSS**: estilização rápida, responsiva e consistente.
-- **React Query**: gerenciamento de dados de API com cache e estados automáticos.
-- **React Hook Form + Zod**: formulários performáticos e validação robusta.
-- **Axios**: requisições HTTP simples e tipadas.
-- **Vitest + Testing Library**: testes rápidos, focados em comportamento real do usuário.
-
-Essas escolhas garantem produtividade, código limpo, fácil manutenção e ótima experiência para desenvolvedores e usuários.
-
-## 🧪 Testes
-
-### Como rodar os testes
-
+### 📋 Scripts disponíveis
 ```bash
-npm run test           # Executa todos os testes
-npm run test:watch     # Executa em modo watch
+npm run dev      # Inicia em modo desenvolvimento
+npm run build    # Build para produção
+npm run preview  # Preview do build
+npm run test     # Executa testes
+npm run lint     # Verifica código com ESLint
 ```
 
-### Tipos de testes implementados
+### 🔧 Configuração adicional
+- Certifique-se de que o **backend** esteja rodando primeiro
+- O frontend depende da API para buscar produtos e registrar pedidos
+- Para rodar os **testes**: `npm run test`
 
-- **Renderização**: verifica se os componentes aparecem corretamente na tela.
-- **Interação**: simula cliques, digitação e navegação do usuário.
-- **Performance**: mede tempo de renderização e re-renderização dos componentes.
-- **API**: valida tipos, estrutura e integração das funções de API (sem mock de rede).
+Aplicação web em React + TypeScript para e-commerce, integrando produtos de dois fornecedores, com busca, filtros, carrinho e finalização de compra.
 
-Os testes ficam na pasta `src/__tests__` e usam [Vitest](https://vitest.dev/) e [Testing Library](https://testing-library.com/).
+## 🚀 Como rodar
 
-## 📁 Estrutura Resumida
+1. **Pré-requisitos:**
+   - Node.js 18+
+   - npm ou yarn
+   - Git
 
+2. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/PhelipeG/teste-tecnico-fullstack.git
+   cd devnology-ecommerce/frontend
+   ```
+
+3. **Instale as dependências:**
+   ```bash
+   npm install
+   ```
+3. **Configure o backend:**
+   - O backend deve estar rodando em http://localhost:3000
+   - Configure o arquivo `.env`:
+     ```bash
+     VITE_BASE_URL_API=http://localhost:3000
+     ```
+4. **Inicie o projeto:**
+   ```bash
+   npm run dev
+   ```
+5. **Acesse:**
+   - http://localhost:5173
+
+## 🛠️ Tecnologias utilizadas
+- **React**: componentização, reatividade e comunidade forte.
+- **TypeScript**: segurança de tipos e manutenção.
+- **Vite**: build rápido e hot reload eficiente.
+- **Tailwind CSS**: estilização rápida e responsiva.
+- **React Query**: gerenciamento de dados de API com cache.
+- **React Hook Form + Zod**: formulários performáticos e validação robusta.
+- **Axios**: requisições HTTP tipadas.
+- **Vitest + Testing Library**: testes rápidos e focados no usuário.
+
+## 📐 Arquitetura e decisões técnicas
+- **Componentização**: Separação clara de componentes, páginas, contextos e serviços.
+- **Context API**: Gerenciamento global do carrinho, simples e eficiente para apps pequenos/médios.
+- **Validação e UX**: Formulários validados com feedback instantâneo.
+- **Performance**: Filtros e buscas feitos via API, evitando processamento local.
+- **Quantidade no carrinho**: Cada item do pedido envia a quantidade correta para o backend.
+- **Filtro por provedor**: Permite filtrar produtos por fornecedor (brasileiro/europeu).
+
+## ✨ Funcionalidades
+- Listagem de produtos de dois fornecedores
+- Busca por nome
+- Filtro por categoria e provedor
+- Carrinho de compras com quantidade
+- Finalização de compra com formulário
+- Integração com backend próprio para registrar pedidos
+- Testes automatizados de componentes e API
+
+## 📸 Screenshots
+
+### Tela Principal (Home)
+![Tela Home](public/screenshorts/tela-home.png)
+*Listagem de produtos com busca e filtros por categoria e provedor*
+
+### Filtros
+![Tela Filtros](public/screenshorts/tela-filtros.png)
+*Sistema de filtros por categoria e provedor (Brasileiro/Europeu)*
+
+### Carrinho de Compras
+![Tela Carrinho](public/screenshorts/tela-carrinho.png)
+*Carrinho com produtos, quantidades e formulário de finalização*
+
+### Histórico de Pedidos
+![Tela Pedidos](public/screenshorts/tela-pedidos.png)
+*Lista de pedidos realizados com detalhes dos produtos*
+
+### Confirmação de Pedido
+![Tela Pedido Success](public/screenshorts/tela-pedido-success.png)
+*Confirmação de pedido realizado com sucesso*
+
+## 📁 Estrutura resumida
 ```
 src/
   components/    # Componentes reutilizáveis
@@ -70,14 +122,5 @@ src/
   __tests__/     # Testes automatizados
 ```
 
-## 🛠️ Scripts úteis
-
-```bash
-npm run dev      # Desenvolvimento
-npm run build    # Build produção
-npm run lint     # Lint do código
-npm run test     # Testes automatizados
-```
-
 ---
-Desenvolvido com React + TypeScript
+Desenvolvido com React + TypeScript, focando em clareza, boas práticas e experiência do usuário.

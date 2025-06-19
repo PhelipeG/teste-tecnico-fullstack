@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCart } from "../../../context/CartContext";
 import { createOrder, type CreateOrderRequest } from "../../../api/api";
 import {
@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 export default function CheckoutForm() {
   const { items, totalPrice, clearCart } = useCart();
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -24,8 +25,7 @@ export default function CheckoutForm() {
     reset,
   } = useForm<CheckoutData>({
     resolver: zodResolver(checkoutSchema),
-  });
-  // Função para criar pedido
+  });  // Função para criar pedido
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
     onSuccess: () => {
@@ -35,6 +35,8 @@ export default function CheckoutForm() {
       setOrderSuccess(true);
       clearCart();
       reset();
+      // Invalidar cache para atualizar lista de pedidos em tempo real
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
     onError: (error) => {
       toast.dismiss("create-order");
