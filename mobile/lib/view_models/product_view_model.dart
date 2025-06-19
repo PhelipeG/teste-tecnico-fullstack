@@ -10,7 +10,11 @@ class ProductViewModel extends ChangeNotifier {
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchProducts({String? name, String? category}) async {
+  Future<void> fetchProducts({
+    String? name,
+    String? category,
+    String? provider,
+  }) async {
     _isLoading = true;
     notifyListeners(); // Avisa a UI que está carregando
 
@@ -18,6 +22,7 @@ class ProductViewModel extends ChangeNotifier {
       _products = await _productService.fetchProducts(
         name: name,
         category: category,
+        provider: provider,
       );
     } catch (e) {
       // Apenas relança o erro para a HomePage tratar a mensagem
@@ -38,11 +43,19 @@ class ProductViewModel extends ChangeNotifier {
     return set.toList();
   }
 
-  Future<void> searchProductsByName(String name) async {
+  Future<void> searchProductsByName(
+    String name, {
+    String? provider,
+    String? category,
+  }) async {
     _isLoading = true;
     notifyListeners();
     try {
-      _products = await _productService.fetchProducts(name: name);
+      _products = await _productService.fetchProducts(
+        name: name,
+        provider: provider,
+        category: category,
+      );
     } catch (e) {
       throw Exception('Erro ao buscar produtos por nome: $e');
     } finally {

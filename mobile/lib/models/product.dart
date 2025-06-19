@@ -8,6 +8,7 @@ class Product {
   final String material;
   final String department;
   final String provider;
+  final String image;
 
   Product({
     required this.id,
@@ -18,6 +19,7 @@ class Product {
     required this.material,
     required this.department,
     required this.provider,
+    required this.image,
   });
 
   // Método para converter Product em Map (JSON)
@@ -31,6 +33,7 @@ class Product {
       'material': material,
       'department': department,
       'provider': provider,
+      'image': image,
     };
   }
 
@@ -45,6 +48,7 @@ class Product {
       material: json['material'] ?? '',
       department: json['department'] ?? '',
       provider: json['provider'] ?? '',
+      image: json['image'] ?? '',
     );
   }
 }

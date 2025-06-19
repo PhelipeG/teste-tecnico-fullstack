@@ -1,13 +1,11 @@
-// views/home_page.dart
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:mobile/views/cart_page.dart';
 import 'package:provider/provider.dart';
 import '../view_models/product_view_model.dart';
-import '../views/product_details_page.dart';
 import '../widgets/cart_icon_badge.dart';
 import '../widgets/category_badge.dart';
+import '../widgets/provider_filter_widget.dart';
+import '../widgets/product_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   String? errorMessage;
   String search = '';
   String? selectedCategory;
+  String? selectedProvider;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -33,10 +32,11 @@ class _HomePageState extends State<HomePage> {
 
   void _onSearchChanged() {
     final name = _searchController.text;
-    Provider.of<ProductViewModel>(
-      context,
-      listen: false,
-    ).searchProductsByName(name);
+    Provider.of<ProductViewModel>(context, listen: false).searchProductsByName(
+      name,
+      provider: selectedProvider,
+      category: selectedCategory,
+    );
   }
 
   Future<void> _loadProducts() async {
@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
       await productVM.fetchProducts(
         name: search.isNotEmpty ? search : null,
         category: selectedCategory,
+        provider: selectedProvider,
       );
       setState(() {
         errorMessage = null;
@@ -78,6 +79,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
+          // Filtro de provedor
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: TextField(
@@ -131,8 +133,20 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ],
-              ),
+              ), // Closing parenthesis for ListView
+            ), // Closing parenthesis for SizedBox
+          Padding(
+            padding: const EdgeInsets.only(top: 12, bottom: 4),
+            child: ProviderFilterWidget(
+              selectedProvider: selectedProvider,
+              onChanged: (provider) {
+                setState(() {
+                  selectedProvider = provider;
+                });
+                _loadProducts();
+              },
             ),
+          ),
           Expanded(
             child: errorMessage != null
                 ? Center(
@@ -184,112 +198,7 @@ class _HomePageState extends State<HomePage> {
                       itemCount: productVM.products.length,
                       itemBuilder: (context, index) {
                         final product = productVM.products[index];
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          elevation: 5,
-                          color: Colors.white,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ProductDetailsPage(product: product),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).primaryColor.withOpacity(0.08),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.all(12),
-                                    child: Icon(
-                                      Icons.shopping_bag,
-                                      size: 40,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    product.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'R\$ ${product.price}',
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    product.provider,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    width: double.infinity,
-                                    margin: const EdgeInsets.only(top: 8),
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Theme.of(
-                                          context,
-                                        ).primaryColor,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ProductDetailsPage(
-                                                  product: product,
-                                                ),
-                                          ),
-                                        );
-                                      },
-                                      child: const Text(
-                                        'Ver detalhes',
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+                        return ProductCard(product: product);
                       },
                     ),
                   ),

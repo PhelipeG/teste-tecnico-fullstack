@@ -1,8 +1,9 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/cart_view_model.dart';
+import '../services/cart_service.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -15,6 +16,40 @@ class _CartPageState extends State<CartPage> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
   String _email = '';
+  bool _isLoading = false;
+
+  Future<void> _finalizarCompra() async {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+    final cartVM = Provider.of<CartViewModel>(context, listen: false);
+    final cart = cartVM.cart;
+    setState(() => _isLoading = true);
+    try {
+      final cartService = CartService();
+      final sucesso = await cartService.finalizarCompra(
+        name: _name,
+        email: _email,
+        cart: cart,
+        totalPrice: cartVM.total,
+      );
+      if (sucesso) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Compra finalizada com sucesso!')),
+        );
+        cartVM.clearCart();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao finalizar compra.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,23 +123,20 @@ class _CartPageState extends State<CartPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _formKey.currentState!.save();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Compra salva para [1m$_name[0m ($_email)!',
+                            onPressed: _isLoading ? null : _finalizarCompra,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
                                     ),
+                                  )
+                                : const Text(
+                                    'Salvar compra',
+                                    style: TextStyle(fontSize: 16),
                                   ),
-                                );
-                                cartVM.clearCart();
-                              }
-                            },
-                            child: const Text(
-                              'Salvar compra',
-                              style: TextStyle(fontSize: 16),
-                            ),
                           ),
                         ),
                       ],

@@ -1,7 +1,9 @@
 // widgets/product_card.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
-import '../views/product_details_page.dart'; // Importe a página de detalhes do produto
+import '../views/product_details_page.dart';
+import '../view_models/cart_view_model.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -57,10 +59,41 @@ class ProductCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                product.provider,
+                product.provider.toLowerCase() == 'brazilian'
+                    ? 'Brasileiro'
+                    : product.provider.toLowerCase() == 'european'
+                    ? 'Europeu'
+                    : 'Outro Fornecedor',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add_shopping_cart, size: 18),
+                  label: const Text('Adicionar ao carrinho'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    Provider.of<CartViewModel>(
+                      context,
+                      listen: false,
+                    ).addToCart(product);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Produto adicionado ao carrinho!'),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

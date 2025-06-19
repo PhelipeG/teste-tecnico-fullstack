@@ -9,7 +9,11 @@ import '../models/product.dart';
 class ProductService {
   static const String _url = 'http://10.0.2.2:3000/products';
 
-  Future<List<Product>> fetchProducts({String? name, String? category}) async {
+  Future<List<Product>> fetchProducts({
+    String? name,
+    String? category,
+    String? provider,
+  }) async {
     try {
       String url = _url;
       final params = <String, String>{};
@@ -18,6 +22,8 @@ class ProductService {
       }
       if (category != null && category.isNotEmpty)
         params['category'] = category;
+      if (provider != null && provider.isNotEmpty)
+        params['provider'] = provider;
       if (params.isNotEmpty) {
         url += '?';
         url += params.entries
