@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
@@ -6,6 +5,8 @@ import {
   IsArray,
   IsNumber,
   ValidateNested,
+  IsInt,
+  Min,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
@@ -30,7 +31,7 @@ export class ProductDto {
   @IsString()
   category: string;
 
-  @ApiProperty({ description: 'URL da imagem do produto' })
+  @ApiProperty({ description: 'URL da imagem do produto', required: false })
   @IsString()
   image: string;
 
@@ -45,6 +46,12 @@ export class ProductDto {
   @ApiProperty({ description: 'Fornecedor do produto (brazilian ou european)' })
   @IsString()
   provider: string;
+
+  @ApiProperty({ description: 'Quantidade do produto no pedido', minimum: 1 })
+  @IsInt()
+  @Min(1)
+  @Transform(({ value }) => parseInt(value, 10))
+  quantity: number;
 }
 
 export class CreateOrderDto {

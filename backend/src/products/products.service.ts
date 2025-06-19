@@ -16,6 +16,7 @@ export interface Product {
   material: string;
   department: string;
   provider: 'brazilian' | 'european';
+  quantity?: number;
 }
 
 export interface ProductFilters {
