@@ -1,16 +1,54 @@
-# mobile
+# Devnology E-commerce - Mobile
 
-A new Flutter project.
+Aplicativo Flutter para e-commerce, consumindo produtos de dois fornecedores via API, com busca, filtro, carrinho persistente e finalização de compra.
 
-## Getting Started
+## 🚀 Como rodar
 
-This project is a starting point for a Flutter application.
+1. **Pré-requisitos:**
+   - Flutter 3.32.0+
+   - Android Studio ou VSCode com plugin Flutter
 
-A few resources to get you started if this is your first Flutter project:
+2. **Instale as dependências:**
+   ```bash
+   flutter pub get
+   ```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+3. **Execute o app:**
+   ```bash
+   flutter run
+   ```
+   > O backend deve estar rodando em http://10.0.2.2:3000 (emulador Android)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠️ Tecnologias utilizadas
+- **Flutter**: desenvolvimento multiplataforma nativo.
+- **Provider**: gerenciamento de estado simples e eficiente.
+- **HTTP**: requisições REST.
+- **Shared Preferences**: persistência local do carrinho.
+
+## 📐 Arquitetura e decisões técnicas
+- **MVVM Simples**: Separação em Models, ViewModels, Services e Views para facilitar manutenção e testes.
+- **Provider**: Escolhido por ser leve, fácil de usar e suficiente para apps de pequeno/médio porte.
+- **Persistência local**: O carrinho é salvo localmente para melhor experiência do usuário.
+- **Componentização**: Widgets reutilizáveis para produtos, categorias, filtro de provedor, etc.
+- **Performance**: Busca e filtros são feitos via API, evitando processamento local pesado.
+
+## ✨ Funcionalidades
+- Listagem de produtos de dois fornecedores
+- Busca por nome
+- Filtro por categoria e provedor (brasileiro/europeu)
+- Carrinho de compras persistente
+- Formulário de finalização de compra
+- Integração com backend próprio para registrar pedidos
+- Tratamento de erros e feedback ao usuário
+
+## 📁 Estrutura resumida
+```
+lib/
+  models/         # Modelos de dados
+  services/       # Serviços de API e persistência
+  view_models/    # Lógica de estado (Provider)
+  views/          # Telas principais
+  widgets/        # Componentes reutilizáveis
+```
+---
+Desenvolvido em Flutter com foco em simplicidade, clareza e boas práticas para projetos júnior.
