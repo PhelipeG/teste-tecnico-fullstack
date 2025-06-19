@@ -114,7 +114,7 @@ export default function OrdersPage() {
                         <p className="font-medium text-gray-900">
                           {formatPrice(parseFloat(item.price))}
                         </p>
-                        <p className="text-gray-500">Qtd: 1</p>
+                        <p className="text-gray-500">Qtd: {item.quantity}</p>
                       </div>
                     </div>
                   ))}

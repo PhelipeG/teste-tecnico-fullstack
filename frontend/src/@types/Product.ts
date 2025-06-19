@@ -8,4 +8,5 @@ export interface Product {
   material: string;
   department: string;
   provider: string;
+  quantity?: number;
 }

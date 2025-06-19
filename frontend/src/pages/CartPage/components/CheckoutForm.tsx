@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,11 +25,10 @@ export default function CheckoutForm() {
   } = useForm<CheckoutData>({
     resolver: zodResolver(checkoutSchema),
   });
-
   // Função para criar pedido
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
-    onSuccess: (response) => {
+    onSuccess: () => {
       toast.success("Pedido criado com sucesso! 🎉", {
         duration: 3000,
       });
@@ -45,17 +43,23 @@ export default function CheckoutForm() {
       });
     },
   });
-
   // Função para enviar o formulário
   const onSubmit = (data: CheckoutData) => {
     if (items.length === 0) {
       toast.error("Seu carrinho está vazio. Adicione produtos antes de finalizar o pedido.🛒");
       return;
     }
+    
+    // Adiciona o campo quantity a cada produto no pedido
+    const productsWithQuantity = items.map((item) => ({
+      ...item.product,
+      quantity: item.quantity
+    }));
+    
     const orderData: CreateOrderRequest = {
       name: data.name,
       email: data.email,
-      items: items.map((item) => item.product),
+      items: productsWithQuantity,
       totalPrice: totalPrice,
     };
     createOrderMutation.mutate(orderData);
